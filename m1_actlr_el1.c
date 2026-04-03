@@ -54,13 +54,13 @@ static void actlr_el1_query(void* info) {
 }
 
 static void actlr_el1_set_bit(void* info) {
-  uint8_t i = *info; // immediately recast info to bit index
+  uint8_t i = *((uint8_t*)info); // immediately recast info to bit index
   general_set_actlr_el1_bit(i);
   actlr_el1_query(info);
 }
 
 static void actlr_el1_clear_bit(void* info) {
-  uint8_t i = *info; // immediately recast info to bit index
+  uint8_t i = *((uint8_t*)info); // immediately recast info to bit index
   general_clear_actlr_el1_bit(i);
   actlr_el1_query(info);
 }
@@ -69,7 +69,7 @@ static void actlr_el1_clear_bit(void* info) {
 static ssize_t actlr_el1_status_load(struct kobject *kobj, struct kobj_attribute *attr, char *buf) {
   on_each_cpu(actlr_el1_query, NULL, 0);
   ssize_t size = 0;
-  for (int i=0;i<NR_CPUS;i++) if (actlr_el1_status[i] != -1) {
+  for (int i = 0; i < NR_CPUS; i++) if (actlr_el1_status[i] != ~0ULL) {
     size += sprintf(buf+size, "CPU[%d].ACTLR_EL1=%llx\n", i, actlr_el1_status[i]);
   }
   return size;
@@ -93,3 +93,39 @@ static ssize_t actlr_el1_status_store(struct kobject *kobj, struct kobj_attribut
   return cnt;
 }
 
+static struct kobj_attribute actlr_el1_status_query = __ATTR(status, 0664, actlr_el1_status_load, actlr_el1_status_store);
+
+static struct attribute *actlr_el1_attrs[] = {
+  &actlr_el1_status_query.attr,
+  NULL,
+};
+
+static struct attribute_group actlr_el1_attr_group = {
+  .attrs = actlr_el1_attrs,
+};
+
+struct kobject* actlr_el1_kobj;
+
+static int __init actlr_el1_init(void) {
+  int ret = 0;
+
+  for (int i = 0; i < NR_CPUS; i++) actlr_el1_status[i] = ~0ULL;
+  on_each_cpu(actlr_el1_query, NULL, 0);
+
+  actlr_el1_kobj = kobject_create_and_add("m1_actlr_el1", kernel_kobj);
+
+  if (!(actlr_el1_kobj)) return -ENOMEM;
+
+  if ((ret = sysfs_create_group(actlr_el1_kobj, &actlr_el1_attr_group)))
+    kobject_put(actlr_el1_kobj);
+
+  return ret;
+}
+
+static void __exit actlr_el1_exit(void) {
+  sysfs_remove_group(actlr_el1_kobj, &actlr_el1_attr_group);
+  kobject_put(actlr_el1_kobj);
+}
+
+module_init(actlr_el1_init);
+module_exit(actlr_el1_exit);
