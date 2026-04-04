@@ -32,7 +32,7 @@ static void actlr_el1_clear_bit(void* info) {
 
 // For each CPU, prints the value of actlr_el1 register
 static ssize_t actlr_el1_status_load(struct kobject *kobj, struct kobj_attribute *attr, char *buf) {
-  on_each_cpu(actlr_el1_query, NULL, 0);
+  on_each_cpu(actlr_el1_query, NULL, 1);
   ssize_t size = 0;
   for (int i = 0; i < NR_CPUS; i++) if (actlr_el1_status_valid[i]) {
     size += sprintf(buf+size, "CPU[%d].ACTLR_EL1=0x%llx\n", i, actlr_el1_status[i]);
@@ -50,8 +50,8 @@ static ssize_t actlr_el1_status_store(struct kobject *kobj, struct kobj_attribut
 
   uint8_t i = (uint8_t)tmp;
 
-  if (action == 's') on_each_cpu(actlr_el1_set_bit, &i, 0);
-  else if (action == 'c') on_each_cpu(actlr_el1_clear_bit, &i, 0);
+  if (action == 's') on_each_cpu(actlr_el1_set_bit, &i, 1);
+  else if (action == 'c') on_each_cpu(actlr_el1_clear_bit, &i, 1);
   else return -EINVAL;
 
   return cnt;
@@ -78,7 +78,7 @@ static int __init actlr_el1_init(void) {
     actlr_el1_status[i] = 0ULL;
     actlr_el1_status_valid[i] = 0;
   }
-  on_each_cpu(actlr_el1_query, NULL, 0);
+  on_each_cpu(actlr_el1_query, NULL, 1);
 
   if (!(actlr_el1_kobj = kobject_create_and_add("m1_actlr_el1", kernel_kobj)))
     return -ENOMEM;
