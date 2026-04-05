@@ -74,7 +74,7 @@ For PF/AF extension:
 
 ## Note for AsahiLinux Kernel > v6.3
 
-Please recompile the kernel with `CONFIG_ARM64_ACTLR_STATE=n` and `CONFIG_ARM64_MEMORY_MODEL_CONTROL=n` in your kernel `.config`.
+Please recompile the kernel with `CONFIG_ARM64_ACTLR_STATE is not set` and `CONFIG_ARM64_MEMORY_MODEL_CONTROL is not set` in your kernel `.config`.
 
 > ⚠️ If you don't do this, every process without prctl set to TSO mode will **return to non-TSO mode** after context switch, and the value of ACTLR_EL1 will be reset.
 
