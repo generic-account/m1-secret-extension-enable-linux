@@ -52,15 +52,15 @@ echo c {i} | sudo tee /sys/kernel/m1_acltr_el1/status
 
 ### ACTLR_EL1 Bit Table
 
-from [Asahi system register dump](https://asahilinux.org/docs/hw/cpu/system-registers/):
+from [Asahi system register dump](https://asahilinux.org/docs/hw/cpu/system-registers/). The bits is set if it is settable / saved: 0b11001111011. Note that this includes all of the Asahi-identified bits except bit 12 for some reason, but also bits 0, 9, and 10. Maybe Bit 12 is settable if some of the other bits are unset?
 
-ACTLR_EL1 (ARM standard-not-standard)
-    [1] Enable TSO
-    [3] Disable HWP
-    [4] Enable APFLG <- this controls AF/PF
-    [5] Enable Apple FP extensions. This makes FPCR.FZ a don't care, and replaces it with AFPCR.DAZ and AFPCR.FTZ.
-    [6] Enable PRSV
-    [12] IC IVAU Enable ASID
+ACTLR_EL1 (ARM standard-not-standard):
+- [1] Enable TSO
+- [3] Disable HWP
+- [4] Enable APFLG <- this controls AF/PF
+- [5] Enable Apple FP extensions. This makes FPCR.FZ a don't care, and replaces it with AFPCR.DAZ and AFPCR.FTZ.
+- [6] Enable PRSV
+- [12] IC IVAU Enable ASID
 
 ## How to Test?
 
