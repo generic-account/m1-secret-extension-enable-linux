@@ -1,8 +1,9 @@
-# TSOEnabler for Linux
+# ACTLR_EL1 Register Poker for Linux
 
-A Linux Kernel Module that enables Total-Store-Ordering on Apple Silicon with Linux.
+A Linux Kernel Module that lets you poke the ACTLR_EL1 register, enabling/disabling some undocumented hardware extensions.
+Right now I've focused on poking bit 4 (APFLG) to enable the AF/PF flag extension, as described in [Why is Rosetta 2 fast](https://dougallj.wordpress.com/2022/11/09/why-is-rosetta-2-fast/).
 
-It was tested on `linux-asahi-5.19.0-5-1-ARCH` with Apple Mac mini (M1, 2020).
+It was tested on `6.18.15-400.asahi.fc43.aarch64+16k` with Apple Macbook Pro (M1, 2020). Make sure to recompile kernel with flags unset before using.
 
 ## How to Use?
 
@@ -10,50 +11,75 @@ It was tested on `linux-asahi-5.19.0-5-1-ARCH` with Apple Mac mini (M1, 2020).
 
 ```bash
 make
-sudo insmod m1tso.ko
+sudo insmod build/m1_acltr_el1.ko
 ```
 
 ### Query status
 
 ```bash
-sudo cat /sys/kernel/m1tso/status
+sudo cat /sys/kernel/m1_acltr_el1/status
 ```
 
+You'll get the value of ACLTR_EL1 register on each CPU (it will look something like this):
 ```
-CPU[0].TSO=0
-CPU[1].TSO=0
-CPU[2].TSO=0
-CPU[3].TSO=0
-CPU[4].TSO=0
-CPU[5].TSO=0
-CPU[6].TSO=0
-CPU[7].TSO=0
-```
-
-### Turn on TSO
-
-```bash
-echo s | sudo tee /sys/kernel/m1tso/status
+CPU[0].ACTLR_EL1=0xc00
+CPU[1].ACTLR_EL1=0xc00
+CPU[2].ACTLR_EL1=0xc00
+CPU[3].ACTLR_EL1=0xc00
+CPU[4].ACTLR_EL1=0xc00
+CPU[5].ACTLR_EL1=0xc00
+CPU[6].ACTLR_EL1=0xc00
+CPU[7].ACTLR_EL1=0xc00
 ```
 
-### Turn off TSO
+### Set bit i
 
 ```bash
-echo c | sudo tee /sys/kernel/m1tso/status
+echo s {i} | sudo tee /sys/kernel/m1_acltr_el1/status
 ```
+
+Ex (turning on APFLG bit 4, the AF/PF extension):
+
+```bash
+echo s 4 | sudo tee /sys/kernel/m1_acltr_el1/status
+```
+
+### Clear bit i
+
+```bash
+echo c {i} | sudo tee /sys/kernel/m1_acltr_el1/status
+```
+
+### ACTLR_EL1 Bit Table
+
+from [Asahi system register dump](https://asahilinux.org/docs/hw/cpu/system-registers/):
+
+ACTLR_EL1 (ARM standard-not-standard)
+    [1] Enable TSO
+    [3] Disable HWP
+    [4] Enable APFLG <- this controls AF/PF
+    [5] Enable Apple FP extensions. This makes FPCR.FZ a don't care, and replaces it with AFPCR.DAZ and AFPCR.FTZ.
+    [6] Enable PRSV
+    [12] IC IVAU Enable ASID
 
 ## How to Test?
 
-See [testtso](https://github.com/saagarjha/TSOEnabler/blob/master/testtso/main.c) in [saagarjha/TSOEnabler](https://github.com/saagarjha/TSOEnabler).
+For TSO, see [testtso](https://github.com/saagarjha/TSOEnabler/blob/master/testtso/main.c) in [saagarjha/TSOEnabler](https://github.com/saagarjha/TSOEnabler).
+I'll implement a test for TSO in a bit.
+
+For PF/AF extension:
+```bash
+./build/pf_af_test
+```
 
 ## Note for AsahiLinux Kernel > v6.3
 
 Please recompile the kernel with `CONFIG_ARM64_ACTLR_STATE=n` and `CONFIG_ARM64_MEMORY_MODEL_CONTROL=n` in your kernel `.config`.
 
-> ⚠️ If you don't do this, every process without prctl set to TSO mode will **return to non-TSO mode** after context switch.
+> ⚠️ If you don't do this, every process without prctl set to TSO mode will **return to non-TSO mode** after context switch, and the value of ACTLR_EL1 will be reset.
 
 Related Issues: [https://github.com/AsahiLinux/linux/issues/189](https://github.com/AsahiLinux/linux/issues/189) [https://github.com/cyyself/m1tso-linux/issues/2](https://github.com/cyyself/m1tso-linux/issues/2)
 
-## Related Blogposts
+## Related Blogposts (from original author of the m1tso kernel module)
 
 [Is TSO a historical burden for modern CPU? Case study on Apple M1](https://blog.cyyself.name/tso-apple-m1/)
