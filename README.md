@@ -73,7 +73,7 @@ For PF/AF extension:
 ```
 
 If the extension is disabled:
-```bash
+```
 test name        PF/AF hw/exp    OK/BAD
 add_af1_pf0      PF 0/0  AF 0/1  BAD
 add_af0_pf0      PF 0/0  AF 0/0  OK
@@ -86,7 +86,7 @@ sub_af1_pf0      PF 0/0  AF 0/0  OK
 ```
 
 If it's enabled:
-```bash
+```
 test name        PF/AF hw/exp    OK/BAD
 add_af1_pf0      PF 0/0  AF 1/1  OK
 add_af0_pf0      PF 0/0  AF 0/0  OK
