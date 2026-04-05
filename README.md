@@ -1,7 +1,7 @@
 # ACTLR_EL1 Register Poker for Linux
 
 A Linux Kernel Module that lets you poke the ACTLR_EL1 register, enabling/disabling some undocumented hardware extensions.
-Right now I've focused on poking bit 4 (APFLG) to enable the AF/PF flag extension, as described in [Why is Rosetta 2 fast](https://dougallj.wordpress.com/2022/11/09/why-is-rosetta-2-fast/). I also updated the original m1tso enabler kernel module to use my helpers, and fix a bug or two.
+Right now I've focused on poking bit 4 (APFLG) to enable the AF/PF flag extension, as described in [Why is Rosetta 2 fast](https://dougallj.wordpress.com/2022/11/09/why-is-rosetta-2-fast/). I also updated the original m1tso enabler kernel module to use my helpers, and fixed a bug or two.
 
 It was tested on `6.18.15-400.asahi.fc43.aarch64+16k` with Apple Macbook Pro (M1, 2020). Make sure to recompile kernel with flags unset before using.
 
