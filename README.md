@@ -20,16 +20,16 @@ sudo insmod build/m1_acltr_el1.ko
 sudo cat /sys/kernel/m1_acltr_el1/status
 ```
 
-You'll get the value of ACLTR_EL1 register on each CPU (it will look something like this):
+You'll get the value of ACLTR_EL1 register on each CPU (it will look something like this if all possible bits are set):
 ```
-CPU[0].ACTLR_EL1=0xc00
-CPU[1].ACTLR_EL1=0xc00
-CPU[2].ACTLR_EL1=0xc00
-CPU[3].ACTLR_EL1=0xc00
-CPU[4].ACTLR_EL1=0xc00
-CPU[5].ACTLR_EL1=0xc00
-CPU[6].ACTLR_EL1=0xc00
-CPU[7].ACTLR_EL1=0xc00
+CPU[0].ACTLR_EL1=0xe7b
+CPU[1].ACTLR_EL1=0xe7b
+CPU[2].ACTLR_EL1=0xe7b
+CPU[3].ACTLR_EL1=0xe7b
+CPU[4].ACTLR_EL1=0xe7b
+CPU[5].ACTLR_EL1=0xe7b
+CPU[6].ACTLR_EL1=0xe7b
+CPU[7].ACTLR_EL1=0xe7b
 ```
 
 ### Set bit i
@@ -52,7 +52,7 @@ echo c {i} | sudo tee /sys/kernel/m1_acltr_el1/status
 
 ### ACTLR_EL1 Bit Table
 
-from [Asahi system register dump](https://asahilinux.org/docs/hw/cpu/system-registers/). The bit is set in the following binary number if it is settable / saved: 0b11001111011. Note that this includes all of the Asahi-identified bits except bit 12 for some reason, but also bits 0, 9, and 10. Maybe bit 12 is settable if some of the other bits are unset?
+from [Asahi system register dump](https://asahilinux.org/docs/hw/cpu/system-registers/). The bit is set in the following binary number if it is settable / saved: 0b111001111011. Note that this includes all of the Asahi-identified bits except bit 12 for some reason, but also bits 0, 9, 10, and 11. Maybe bit 12 is settable if some of the other bits are unset?
 
 ACTLR_EL1 (ARM standard-not-standard):
 - [1] Enable TSO
